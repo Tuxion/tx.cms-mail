@@ -1,0 +1,19 @@
+{
+  "title":"Mail component",
+  "description":"Maakt uitgebreide email functionaliteit mogelijk.",
+  "type":"manual",
+  "versions":
+  [
+    {
+      "version":"1.1",
+      "date":"2012-09-11",
+      "description":"Validatie mogelijkheden toegevoegd.",
+      "changes":[
+        {
+          "title":"Validatie mogelijkheden",
+          "description":"Componenten die gebruikmaken van het mail component kunnen nu uitgebreide validatie uitvoeren voor deze te verzenden."
+        }
+      ]
+    }
+  ]
+}
