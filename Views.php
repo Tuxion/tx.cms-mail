@@ -3,6 +3,14 @@
 class Views extends \dependencies\BaseViews
 {
   
-  
+  protected function mailing()
+  {
+    
+    return array(
+      'editor' => $this->section('mailing_editor'),
+      'history' => $this->section('mailing_history')
+    );
+    
+  }
   
 }

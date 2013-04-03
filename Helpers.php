@@ -1,7 +1,144 @@
 <?php namespace components\mail; if(!defined('TX')) die('No direct access.');
 
+//Preload the mailings class, then bind it.
+tx('Sql')->model('mail', 'Mailings');
+
+use \components\mail\models\Mailings;
+
 class Helpers extends \dependencies\BaseComponent
 {
+  
+  /**
+   * Creates / updates a mailing that is meant to be stored and retrievable.
+   * Note: since this function includes minimal validation so that the saving can be done easily.
+   *
+   * @author Beanow
+   * @param Integer $data->id The ID of an existing mailing.
+   * @param String $data->subject The subject for the mailing.
+   * @param String $data->message The html message for the mailing.
+   * @param String $data->state The state value. Possible values: [DRAFTING|TESTING|SENT] (default: DRAFTING).
+   * @param MailingRecipients[] $data->recipients A list of recipients for this mailing (mailing_id is ignored).
+   * @param MailingTesters[] $data->testers A list of testers for this mailing (mailing_id is ignored).
+   * @return Mailing The stored mailing object with all associated testers and recipients.
+   */
+  public function register_mailing(\dependencies\Data $data)
+  {
+    
+    //Filter and validate input.
+    $data = $data->having('id', 'subject', 'message', 'state', 'recipients', 'testers')
+      ->id->validate('ID', array('number'=>'integer', 'gt'=>0))->back()
+      ->subject->validate('Subject', array('required', 'string', 'no_html'))->back()
+      ->message->validate('Message', array('required', 'string'))->back()
+      ->state->validate('State', array('string', 'in'=>array(
+          Mailings::STATE_DRAFTING,
+          Mailings::STATE_TESTING,
+          Mailings::STATE_ERROR,
+          Mailings::STATE_SENT
+        )))->back()
+      ->recipients->validate('Recipient(s)', array('array'))->back()
+      ->testers->validate('Tester(s)', array('array'))->back();
+    
+    tx('Logging')->log('Mailing component', 'Register mailing called', $data->dump());
+    
+    //Initiate blank model.
+    $Mailing = tx('Sql')->model('mail', 'Mailings');
+    
+    //Try and get the existing mailing.
+    if($data->id->is_set()){
+      
+      tx('Sql')
+        ->table('mail', 'Mailings')
+        ->pk($data->id)
+        ->execute_single()
+        ->is('set', function($existing)use(&$Mailing){
+          $Mailing = $existing;
+        });
+      
+    }
+    
+    //Merge and save the mailing model with input data.
+    $Mailing
+      ->merge($data->having('state', 'subject', 'message'))
+      ->save();
+    
+    //Function to merge and save old recipients with new recipients, that outputs a result collection.
+    $mergeRecipients = function($result, $old, $new, $mailing_id){
+      
+      //Clear the target.
+      $result->un_set();
+      
+      //Clone the input.
+      $old = $old->copy();
+      $new = $new->copy();
+      
+      //Cross-match old with new, to find which ones are to be kept.
+      $old->each(function($old_item)use($new, $result, $mailing_id){
+        $new->each(function($new_item)use($old_item, $result, $mailing_id){
+          
+          //Before we match it, force the mailing_id to the one we have now.
+          $new_item->merge(array('mailing_id'=>$mailing_id));
+          
+          //When we have a match from the old and new, store it in the results.
+          if($old_item->is_equal($new_item)){
+            
+            $result->__get(null)->become($old_item->copy());
+            $old_item->un_set();
+            $new_item->un_set();
+            
+          }
+          
+        });
+      });
+      
+      //Delete all remaining old ones.
+      $old->each(function($imgoingbyebye){
+        
+        //Skip the unset ones.
+        if(!$imgoingbyebye->is_set())
+          return true;
+        
+        $imgoingbyebye->delete();
+        
+      });
+      
+      //Append all the remaining new ones to the results.
+      $new->each(function($add_me)use($result, $mailing_id){
+        
+        //Skip the unset ones.
+        if(!$add_me->is_set())
+          return true;
+        
+        //Before we add it, force the mailing_id to the one we have now.
+        $add_me->merge(array('mailing_id'=>$mailing_id));
+        
+        $result->__get(null)->become($add_me);
+        $add_me->save();
+        
+      });
+      
+    };
+    
+    //Merge testers and recipients with old data.
+    $Recipients = Data();
+    $Testers = Data();
+    $mergeRecipients($Recipients, $Mailing->recipients, $data->recipients, $Mailing->id->get());
+    $mergeRecipients($Testers, $Mailing->testers, $data->testers, $Mailing->id->get());
+    
+    //Save the current result states.
+    $Recipients->each(function($recipient){
+      $recipient->save();
+    });
+    $Testers->each(function($recipient){
+      $recipient->save();
+    });
+    
+    //Return the mailing, with the collected recipients and testers.
+    return $Mailing->merge(array(
+      'recipients' => $Recipients,
+      'testers' => $Testers
+    ));
+    
+  }
   
   /**
    * Sends an email that is not meant to be stored or retrievable.
@@ -141,7 +278,7 @@ class Helpers extends \dependencies\BaseComponent
             if(!file_exists($debug_output_dir))
               @mkdir($debug_output_dir);
             
-            $f = @fopen($debug_output_dir.DS.'mail_'.time().'.txt', 'w');
+            $f = @fopen($debug_output_dir.DS.'mail_'.time().'_'.sha1($mailer->GetSentMIMEMessage()).'.eml', 'w');
             @fwrite($f, $mailer->GetSentMIMEMessage());
             @fclose($f);
             return $mailer;
@@ -151,7 +288,7 @@ class Helpers extends \dependencies\BaseComponent
           //Send the email!
           else{
             //WOOOOOO!
-            //Never though sending an email could be this complex huh?
+            //Never thought sending an email could be this complex huh?
             $mailer->Send();
             return $mailer;
           }
@@ -185,7 +322,7 @@ class Helpers extends \dependencies\BaseComponent
    * @author Beanow
    * @param mixed $input The input that is supposed to be email input.
    * @param Boolean $allow_multiple Whether to allow multiple email addresses to be included.
-   * @return Array A normalized Data array of email addresses in the format: {#:{name:'name', email:'email'}}
+   * @return Array A normalized Data array of email addresses in the format: {'email':{name:'name', email:'email'}}
    */
   public function normalize_email_input($input, $allow_multiple=true)
   {
@@ -199,7 +336,7 @@ class Helpers extends \dependencies\BaseComponent
     //The function to use to do a recursive call.
     $reitterate = function($input)use($helper, $allow_multiple)
     {
-    
+      
       //Check if we're allowed to use multiples.
       if($allow_multiple !== true)
         throw new \exception\Validation('Email input is malformatted: multiple email addresses supplied where not allowed.');
@@ -212,7 +349,7 @@ class Helpers extends \dependencies\BaseComponent
         //  {0:{name:'Name', email:'email@domain.net'}}
         $helper->normalize_email_input($row, false)
           ->each(function($pair)use($output){
-            $output->{null}->set($pair);
+            $output->{$pair->email->get('string')}->set($pair);
           });
         
       }
@@ -231,13 +368,13 @@ class Helpers extends \dependencies\BaseComponent
         {
           
           /* ---------- Format type: 6 ---------- */
-          return Data(array(array(
+          return Data(array((string)$input['email'] => array(
             'name'=>$input['name'],
             'email'=>$input['email']
           )))
-          ->{0}
+          ->{$input['email']}
             ->name->validate('Name', array('string'))->back()
-            ->email->validate('Email', array('email'))->back()
+            ->email->validate('Email', array('required', 'email'))->back()
           ->back();
           
         }
@@ -261,7 +398,7 @@ class Helpers extends \dependencies\BaseComponent
         {
           
           /* ---------- Format type: 7 ---------- */
-          return Data(array(array(
+          return Data(array((string)$matches[2] => array(
             'name' => $matches[1], //Name is now validated by regex.
             'email' => Data($matches[2])->validate('Email', array('required', 'email'))->get() //Email needs another validation pass.
           )));
@@ -281,7 +418,7 @@ class Helpers extends \dependencies\BaseComponent
         //Check if we have an EXACT format 8 (email).
         else {
           /* ---------- Format type: 8 ---------- */
-          return Data(array(array(
+          return Data(array((string)$input => array(
             'name' => '',
             'email' => Data($input)->validate('Email', array('required', 'email'))->get()
           )));

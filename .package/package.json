@@ -2,8 +2,28 @@
   "title":"Mail component",
   "description":"Maakt uitgebreide email functionaliteit mogelijk.",
   "type":"manual",
+  "dbUpdates": true,
   "versions":
   [
+    {
+      "version":"2.0",
+      "date":"2013-04-02",
+      "description":"Mailing uitbreidingen.",
+      "changes":[
+        {
+          "title":"Templating",
+          "description":"Bij het opstellen van een mailing is er nu een template beschikbaar om als uitgangspunt te gebruiken."
+        },
+        {
+          "title":"Test-mailing",
+          "description":"Voor het versturen van de daadwerkelijke mailing is het mogelijk een test-mailing te sturen."
+        },
+        {
+          "title":"Mailing geschiedenis",
+          "description":"Om het mailing process te stroomlijnen is er een geschiedenis beschikbaar voor alle mailingen middels dit nieuwe systeem."
+        }
+      ]
+    },
     {
       "version":"1.1",
       "date":"2012-09-11",
