@@ -11,6 +11,10 @@
 
 /* Backend */
 
+#tx-backend #configbar .mail-mailing{
+  background-image:url('img/small-icon.gif');
+}
+
 #tx-backend .mailing-history{
   float:left;
   width:20%;

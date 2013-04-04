@@ -10,8 +10,35 @@ class DBUpdates extends \components\update\classes\BaseDBUpdates
   protected
     $component = 'mail',
     $updates = array(
-      '1.1' => '2.0'
+      '1.1' => '2.0',
+      '2.0' => '2.1'
     );
+  
+  public function update_to_2_1($current_version, $forced)
+  {
+    
+    if($forced === true){
+      tx('Sql')->query('DROP TABLE IF EXISTS `#__mail_subscriptions`');
+    }
+    
+    tx('Sql')->query('
+      CREATE TABLE `#__mail_subscriptions` (
+        `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+        `key` varchar(255) NOT NULL,
+        `email` varchar(255) NOT NULL,
+        `name` varchar(255) NULL,
+        `subscription` ENUM(\'UNKNOWN\', \'SUBSCRIBED\', \'UNSUBSCRIBED\') NOT NULL DEFAULT \'UNKNOWN\',
+        `dt_subscribed` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        `dt_unsubscribed` TIMESTAMP NULL,
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `key` (`key`),
+        UNIQUE KEY `email` (`email`),
+        KEY `subscription` (`subscription`),
+        KEY `dt_subscribed` (`dt_subscribed`)
+      ) ENGINE=MyISAM DEFAULT CHARSET=utf8
+    ');
+    
+  }
   
   public function update_to_2_0($current_version, $forced)
   {

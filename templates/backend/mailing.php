@@ -9,7 +9,7 @@ window.txBackend = txBackend;
 
 </script>
 
-<h1><?php echo __($names->component, 'Mailing'); ?></h1>
+<h1><?php __($names->component, 'Mailing'); ?></h1>
 
 <div class="clearfix">
   

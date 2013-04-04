@@ -125,13 +125,45 @@ class Mailings extends \dependencies\BaseModel
     //Mailers only validate, so store them for later.
     $mailers = Data();
     
-    foreach($this->normalize_addresses($to) as $address){
+    $recipients = $this->normalize_addresses($to);
+    
+    //Check if we have enough recipients.
+    if($recipients->is_empty()){
+      $ex = new \exception\Validation("You must provide at least one recipient.");
+      $ex->key($to.'_input');
+      $ex->errors(array('You must provide at least one recipient'));
+      throw $ex;
+    }
+    
+    //Turn the addresses into subscriptions.
+    $recipients = tx('Component')->helpers('mail')->call('normalized_email_to_subscriptions', array(
+      'addresses' => $recipients,
+      'auto_subscribe' => true,
+      'filter_unsubscribed' => true
+    ));
+    
+    foreach($recipients as $address){
+      
+      $message = $this->message->get();
+      
+      //Find all unsubscribe links.
+      preg_match_all('~<a[^>]+data-unsubscribe="true"[^>]+>~', $message, $unsubscribeElements, PREG_SET_ORDER);
+      
+      //Go over each of them.
+      foreach($unsubscribeElements as $unsubscribeElement)
+      {
+        
+        //Replace the element with the resulting link.
+        $link = url('/?action=mail/unsubscribe/get&key='.urlencode($address->key->get()), true);
+        $message = str_replace($unsubscribeElement[0], '<a class="unsubscribe" data-unsubscribe="true" href="'.$link->output.'">', $message);
+        
+      }
       
       //Validate email through the helper.
       tx('Component')->helpers('mail')->send_fleeting_mail(array(
-        'to' => $address,
+        'to' => $address->as_normalized_email(),
         'subject' => $this->subject,
-        'html_message' => $this->message,
+        'html_message' => $message,
         'validate_only' => true
       ))
       

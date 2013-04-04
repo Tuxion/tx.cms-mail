@@ -13,14 +13,14 @@ $uid = tx('Security')->random_string(20);
   <div class="ctrlHolder">
     <label for="l_recipients_input"><?php __($names->component, 'Recipient(s)'); ?></label>
     <input class="big large no-enter recipients-autocomplete" data-recipient-class="recipient"
-      type="text" id="l_recipients_input" tabindex="1" />
+      type="text" id="l_recipients_input" name="recipients_input" tabindex="1" />
     <div class="recipients-container clearfix" data-recipient-class="recipient"></div>
   </div>
   
   <div class="ctrlHolder">
     <label for="l_testers_input"><?php __($names->component, 'Tester(s)'); ?></label>
     <input class="big large no-enter recipients-autocomplete" data-recipient-class="tester"
-      type="text" id="l_testers_input" tabindex="2" />
+      type="text" id="l_testers_input" name="testers_input" tabindex="2" />
     <div class="recipients-container clearfix" data-recipient-class="tester"></div>
   </div>
   
@@ -37,9 +37,9 @@ $uid = tx('Security')->random_string(20);
   </div>
   
   <div class="buttonHolder">
-    <input class="primaryAction button grey" type="submit" name="DRAFT" value="<?php __($names->component, 'Save draft'); ?>" tabindex="7" />
+    <input class="button grey" type="submit" name="DRAFT" value="<?php __($names->component, 'Save draft'); ?>" tabindex="7" />
     <input class="primaryAction button grey" type="submit" name="TEST" value="<?php __($names->component, 'Send test-mailing'); ?>" tabindex="5" />
-    <input class="primaryAction button black" type="submit" name="SEND" value="<?php __($names->component, 'Send mailing'); ?>" tabindex="6" />
+    <input class="button black" type="submit" name="SEND" value="<?php __($names->component, 'Send mailing'); ?>" tabindex="6" />
   </div>
   
   <script type="text/javascript">
@@ -132,8 +132,6 @@ $uid = tx('Security')->random_string(20);
         window.console && console.log && console.log('Unsupported recipient type, use a "user" or "group" type.');
         return;
       }
-      
-      console.log('Do insert', recipientClass, type, item);
       
       selectedRecipients[recipientClass][type+'s'][item.id] = true;
       

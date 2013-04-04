@@ -1,12 +1,61 @@
 <?php namespace components\mail; if(!defined('TX')) die('No direct access.');
 
-//Preload the mailings class, then bind it.
+//Preload and bind models to have easy constant access.
 tx('Sql')->model('mail', 'Mailings');
-
 use \components\mail\models\Mailings;
+
+tx('Sql')->model('mail', 'Subscriptions');
+use \components\mail\models\Subscriptions;
 
 class Helpers extends \dependencies\BaseComponent
 {
+  
+  /**
+   * Takes an array of normalized email addresses and returns their corresponding Subscription models.
+   *
+   * @param Data $data->addresses An array of normalized e-mail addresses.
+   * @param Boolean $data->auto_subscribe Whether to automatically add a subscription for new e-mail addresses.
+   * @param Boolean $data->filter_unsubscribed Whether to automatically filter out addresses that unsubscribed.
+   * @return Data An array of their corresponding Subscription models.
+   */
+  public function normalized_email_to_subscriptions($data)
+  {
+    
+    $result = Data();
+    foreach($data->addresses as $index => $address){
+      
+      $model = tx('Sql')
+        ->table('mail', 'Subscriptions')
+        ->where('email', "'{$address->email}'")
+        ->execute_single()
+        
+        //In case it's not in the database, generate it.
+        ->is('empty', function()use($address, $data){
+          
+          return tx('Sql')
+            ->model('mail', 'Subscriptions')
+            ->merge($address->having('email', 'name'))
+            
+            //See if this model should be auto-subscribed.
+            ->is($data->auto_subscribe->is_true(), function($subscription){
+              $subscription->merge(array('subscription' => Subscriptions::SUBSCRIPTION_SUBSCRIBED));
+            })
+            
+            ->save();
+          
+        });
+      
+      if($data->filter_unsubscribed->is_true() && $model->is_unsubscribed()){
+        continue;
+      }
+      
+      //Uses __get(null)->become() to prevent the model from being converted to a Data object.
+      $result->__get(null)->become($model);
+      
+    }
+    return $result;
+    
+  }
   
   /**
    * Creates / updates a mailing that is meant to be stored and retrievable.

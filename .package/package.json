@@ -6,6 +6,18 @@
   "versions":
   [
     {
+      "version":"2.1",
+      "date":"2013-04-04",
+      "description":"Uitschrijf-functie toegevoegd.",
+      "changes":[
+        {
+          "title":"Uitschrijven is nu mogelijk",
+          "description":"De mogelijkheid tot uitschrijven is toegevoegd. Hiervoor kan een uitschrijf-link worden ingevoegd in een e-mail bericht.",
+          "url":"http://handleiding.tuxion.nl/index.php?pid=161"
+        }
+      ]
+    },
+    {
       "version":"2.0",
       "date":"2013-04-02",
       "description":"Mailing uitbreidingen.",
