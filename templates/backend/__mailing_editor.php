@@ -4,6 +4,7 @@ $uid = tx('Security')->random_string(20);
 <form method="put" id="<?php echo $uid; ?>" action="<?php echo url('rest=mail/mailing',1); ?>" class="form mailing-editor-form">
   
   <input type="hidden" name="id" value="<?php echo $data->mailing->id; ?>" />
+  <input type="hidden" name="command" value="" />
   
   <div class="ctrlHolder">
     <label for="l_template_input"><?php __($names->component, 'Used template'); ?></label>
@@ -37,9 +38,9 @@ $uid = tx('Security')->random_string(20);
   </div>
   
   <div class="buttonHolder">
-    <input class="button grey" type="submit" name="DRAFT" value="<?php __($names->component, 'Save draft'); ?>" tabindex="7" />
-    <input class="primaryAction button grey" type="submit" name="TEST" value="<?php __($names->component, 'Send test-mailing'); ?>" tabindex="5" />
-    <input class="button black" type="submit" name="SEND" value="<?php __($names->component, 'Send mailing'); ?>" tabindex="6" />
+    <a href="#" class="command button grey" data-command="DRAFT" tabindex="7"><?php __($names->component, 'Save draft'); ?></a>
+    <a href="#" class="primaryAction command button grey" data-command="TEST" tabindex="5"><?php __($names->component, 'Send test-mailing'); ?></a>
+    <a href="#" class="command button black" data-command="SEND" tabindex="6"><?php __($names->component, 'Send mailing'); ?></a>
   </div>
   
   <script type="text/javascript">
@@ -56,18 +57,20 @@ $uid = tx('Security')->random_string(20);
     //Prevent submitting with enter.
     $('.no-enter').on('keypress', function(e){ if(e.which == 13) e.preventDefault(); });
     
+    //Add submission commands.
+    $form.find('a.command').on('click', function(e){
+      e.preventDefault();
+      $form.find('[name=command]').val($(this).attr('data-command'));
+      $form.trigger('submit');
+    });
+    
     //Make awesomesauce notifications possible.
     $form.restForm({
       
       beforeSubmit: function(data){
         
-        data.command =  data.DRAFT ? 'DRAFT':
-                        data.TEST ? 'TEST':
-                        data.SEND ? 'SEND':
-                        null;
-        delete data.DRAFT;
-        delete data.TEST;
-        delete data.SEND;
+        delete data.recipients_input;
+        delete data.testers_input;
         
         if(hasFeedback){
           switch(data.command){
