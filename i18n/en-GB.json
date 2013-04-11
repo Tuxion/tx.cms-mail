@@ -1,1 +1,5 @@
-{}
+{
+  "MAIL_MAILING_TITLE": "Mailing",
+  "MAIL_MAILING_DESCRIPTION": "Mailing component, lets you manage and send mailings",
+  "NO_TEMPLATE": "None"
+}
