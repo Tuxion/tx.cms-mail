@@ -103,6 +103,12 @@ class MailForm
     
     $this->form_data = $data;
     
+    $i=0;
+    foreach($this->fields as $title => $type){
+      $this->form_data['data'][$i]->validate($title, array('required', 'string', 'not_empty'));
+      $i++;
+    }
+    
     return $this;
     
   }
