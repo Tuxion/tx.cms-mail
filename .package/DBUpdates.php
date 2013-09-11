@@ -11,8 +11,29 @@ class DBUpdates extends \components\update\classes\BaseDBUpdates
     $component = 'mail',
     $updates = array(
       '1.1' => '2.0',
-      '2.0' => '2.1'
+      '2.0' => '2.1',
+      '2.1' => '0.3.0-beta'
     );
+  
+  public function update_to_0_3_0_beta($current_version, $forced)
+  {
+    
+    if($forced === true){
+      mk('Sql')->query('DROP TABLE IF EXISTS `#__mail_mail_form`');
+    }
+    
+    mk('Sql')->query('
+      CREATE TABLE `#__mail_form_entries` (
+        `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+        `subject` varchar(255) NOT NULL,
+        `recipient` varchar(255) NOT NULL,
+        `mail_contents` TEXT NOT NULL,
+        PRIMARY KEY (`id`),
+        INDEX `subject` (`subject`)
+      ) ENGINE=MyISAM DEFAULT CHARSET=utf8
+    ');
+    
+  }
   
   public function update_to_2_1($current_version, $forced)
   {

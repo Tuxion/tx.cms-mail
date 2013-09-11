@@ -59,7 +59,7 @@ class Helpers extends \dependencies\BaseComponent
   
   /**
    * Creates / updates a mailing that is meant to be stored and retrievable.
-   * Note: since this function includes minimal validation so that the saving can be done easily.
+   * Note: this function includes minimal validation so that the saving can be done easily.
    *
    * @author Beanow
    * @param Integer $data->id The ID of an existing mailing.
@@ -244,6 +244,7 @@ class Helpers extends \dependencies\BaseComponent
     //Use PHPMailer plugin to send mail.
     load_plugin('phpmailer');
     $mailer = new \plugins\PHPMailer(true); //True is for throwing exceptions.
+    $mailer->CharSet = 'utf-8';
     
     return tx('Sending email', function()use($mailer, $data){
       

@@ -1,49 +1,54 @@
 {
-  "title":"Mail component",
-  "description":"Maakt uitgebreide email functionaliteit mogelijk.",
-  "type":"manual",
+  "title": "Mail component",
+  "description": "Maakt uitgebreide email functionaliteit mogelijk.",
+  "type": "manual",
   "dbUpdates": true,
-  "versions":
-  [
+  "versions": [
     {
-      "version":"2.1",
-      "date":"2013-04-04",
-      "description":"Uitschrijf-functie toegevoegd.",
-      "changes":[
+      "version": "0.3.0-beta",
+      "date": "2013-09-11",
+      "description": "De mogelijkheid om e-mail formulieren te maken (als ontwikkelaar) is toegevoegd.",
+      "changes": []
+    },
+    {
+      "version": "2.1",
+      "date": "2013-04-04",
+      "description": "Uitschrijf-functie toegevoegd.",
+      "changes": [
         {
-          "title":"Uitschrijven is nu mogelijk",
-          "description":"De mogelijkheid tot uitschrijven is toegevoegd. Hiervoor kan een uitschrijf-link worden ingevoegd in een e-mail bericht.",
-          "url":"http://handleiding.tuxion.nl/index.php?pid=161"
+          "title": "Uitschrijven is nu mogelijk",
+          "description": "De mogelijkheid tot uitschrijven is toegevoegd. Hiervoor kan een uitschrijf-link worden ingevoegd in een e-mail bericht.",
+          "url": "http://handleiding.tuxion.nl/index.php?pid=161"
         }
       ]
     },
     {
-      "version":"2.0",
-      "date":"2013-04-02",
-      "description":"Mailing uitbreidingen.",
-      "changes":[
+      "version": "2.0",
+      "date": "2013-04-02",
+      "description": "Mailing uitbreidingen.",
+      "changes": [
         {
-          "title":"Templating",
-          "description":"Bij het opstellen van een mailing is er nu een template beschikbaar om als uitgangspunt te gebruiken."
+          "title": "Templating",
+          "description": "Bij het opstellen van een mailing is er nu een template beschikbaar om als uitgangspunt te gebruiken."
         },
         {
-          "title":"Test-mailing",
-          "description":"Voor het versturen van de daadwerkelijke mailing is het mogelijk een test-mailing te sturen."
+          "title": "Test-mailing",
+          "description": "Voor het versturen van de daadwerkelijke mailing is het mogelijk een test-mailing te sturen."
         },
         {
-          "title":"Mailing geschiedenis",
-          "description":"Om het mailing process te stroomlijnen is er een geschiedenis beschikbaar voor alle mailingen middels dit nieuwe systeem."
+          "title": "Mailing geschiedenis",
+          "description": "Om het mailing process te stroomlijnen is er een geschiedenis beschikbaar voor alle mailingen middels dit nieuwe systeem."
         }
       ]
     },
     {
-      "version":"1.1",
-      "date":"2012-09-11",
-      "description":"Validatie mogelijkheden toegevoegd.",
-      "changes":[
+      "version": "1.1",
+      "date": "2012-09-11",
+      "description": "Validatie mogelijkheden toegevoegd.",
+      "changes": [
         {
-          "title":"Validatie mogelijkheden",
-          "description":"Componenten die gebruikmaken van het mail component kunnen nu uitgebreide validatie uitvoeren voor deze te verzenden."
+          "title": "Validatie mogelijkheden",
+          "description": "Componenten die gebruikmaken van het mail component kunnen nu uitgebreide validatie uitvoeren voor deze te verzenden."
         }
       ]
     }
